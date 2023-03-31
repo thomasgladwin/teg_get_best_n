@@ -46,27 +46,21 @@ def t_split(t):
         return 1
     k_v = []
     scores = []
-    for k in range(1, len(t) - 1):
-        if k > 0:
+    for k in range(0, len(t) - 1):
+        if k == 0:
+            score = 1
+        else:
             lhs = t[:k]
             ws_left = np.var(lhs)
             m_lhs = np.mean(lhs)
-        else:
-            lhs = []
-            ws_left = 0
-            m_lhs = np.NaN
-        if k < len(t) - 1:
             rhs = t[(k + 1):]
             ws_right = np.var(rhs)
             m_rhs = np.mean(rhs)
-        else:
-            rhs = []
-            ws_right = 0
-            m_rhs = np.NaN
-        betw_v = [m_lhs for n in lhs]
-        betw_v = betw_v + [m_rhs for n in rhs]
-        bs = np.var(betw_v)
-        score = bs / (ws_left + ws_right)
+            betw_v = [m_lhs for n in lhs]
+            betw_v = betw_v + [m_rhs for n in rhs]
+            bs = np.var(betw_v)
+            score = bs / (ws_left + ws_right)
+            # score = bs
         scores.append(score)
         k_v.append(k)
     nComp = k_v[np.argmax(scores)]

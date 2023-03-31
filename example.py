@@ -1,3 +1,4 @@
+import numpy as np
 import teg_get_best_n
 
 # Tests
@@ -11,7 +12,7 @@ nL_est = []
 for iSim in range(nSims):
     if iSim % 10 == 0:
         print(iSim)
-    nL = np.random.randint(1, nL_max)
+    nL = np.random.randint(0, nL_max)
     X = teg_get_best_n.make_sim_data(nObs, nVar, nL, noise)
     O = teg_get_best_n.get_n_components(X)
     nComp = O['nComponents']
