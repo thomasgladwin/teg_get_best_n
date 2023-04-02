@@ -1,5 +1,7 @@
 import numpy as np
 
+# Estimate the true/generating number of components/dimensions.
+
 # Generate test data
 def make_sim_data(nObs, nVar, nL, noise):
     X = noise * np.random.rand(nObs, nVar)
@@ -25,6 +27,8 @@ def get_eigenvector_sims(X1, X2):
         most_sim_ind = np.argmax(Sims[:, iL])
         sims.append(Sims[most_sim_ind, iL])
         Sims[most_sim_ind, iL] = 0
+    sims.sort()
+    sims = sims[::-1]
     return sims
 
 def t_per_component(X, nIts = 100):
@@ -43,7 +47,7 @@ def t_per_component(X, nIts = 100):
 
 def t_split(t):
     if len(t) < 2:
-        return 1
+        return 0
     k_v = []
     scores = []
     for k in range(0, len(t) - 1):
@@ -71,4 +75,3 @@ def get_n_components(X):
     t = t_per_component(X)
     nComp = t_split(t)
     return {'nComponents': nComp, 'eigenvalues': eigenvalues, 'eigenvectors': eigenvectors}
-
