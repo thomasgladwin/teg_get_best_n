@@ -7,6 +7,7 @@ def make_sim_data(nObs, nVar, nL, noise):
     X = noise * np.random.rand(nObs, nVar)
     for iL in range(nL):
         coeffs = np.random.rand(nVar).reshape(1, nVar)
+        coeffs = (coeffs - np.mean(coeffs)) / np.sqrt(np.var(coeffs))
         y1 = np.random.rand(nObs, 1)
         X = X + y1 @ coeffs
     return X
@@ -26,12 +27,12 @@ def get_eigenvector_sims(X1, X2):
     for iL in range(Sims.shape[1]):
         most_sim_ind = np.argmax(Sims[:, iL])
         sims.append(Sims[most_sim_ind, iL])
-        Sims[most_sim_ind, iL] = 0
+        #Sims[most_sim_ind, iL] = 0
     sims.sort()
     sims = sims[::-1]
     return sims
 
-def t_per_component(X, nIts = 100):
+def sim_per_component(X, nIts = 20):
     nObs, nVar = X.shape
     Sims = np.zeros((nIts, nVar))
     for iIt in range(nIts):
@@ -45,33 +46,35 @@ def t_per_component(X, nIts = 100):
     m = np.median(Sims, axis=0)
     return m
 
-def t_split(t):
-    if len(t) < 2:
+def sims_split(sims):
+    if len(sims) < 2:
         return 0
-    k_v = []
-    scores = []
-    for k in range(0, len(t) - 1):
-        if k == 0:
-            score = 1
-        else:
-            lhs = t[:k]
-            ws_left = np.var(lhs)
-            m_lhs = np.mean(lhs)
-            rhs = t[(k + 1):]
-            ws_right = np.var(rhs)
-            m_rhs = np.mean(rhs)
-            betw_v = [m_lhs for n in lhs]
-            betw_v = betw_v + [m_rhs for n in rhs]
-            bs = np.var(betw_v)
-            score = bs / (ws_left + ws_right)
-            # score = bs
+    k_v = [0]
+    scores = [1]
+    scores_unadjusted = [1]
+    for k in range(1, len(sims) - 1):
+        lhs = sims[:k]
+        rhs = sims[(k + 1):]
+        ws_left = np.var(lhs)
+        ws_right = np.var(rhs)
+        m_lhs = np.mean(lhs)
+        m_rhs = np.mean(rhs)
+        betw_v = [m_lhs for n in lhs]
+        betw_v = betw_v + [m_rhs for n in rhs]
+        bs = np.var(betw_v)
+        score = bs / (ws_left + ws_right)
+        scores_unadjusted.append(score)
+        score = score * (1 - k/len(sims))
         scores.append(score)
         k_v.append(k)
-    nComp = k_v[np.argmax(scores)]
-    return nComp
+    if np.max(scores) > 1:
+        nComp = k_v[np.argmax(scores_unadjusted)]
+    else:
+        nComp = k_v[np.argmax(scores)]
+    return nComp, np.max(scores)
 
-def get_n_components(X):
+def get_n_components(X, nIts=10):
     eigenvalues, eigenvectors = run_PCA(X)
-    t = t_per_component(X)
-    nComp = t_split(t)
+    sims = sim_per_component(X, nIts=nIts)
+    nComp, max_score = sims_split(sims)
     return {'nComponents': nComp, 'eigenvalues': eigenvalues, 'eigenvectors': eigenvectors}
