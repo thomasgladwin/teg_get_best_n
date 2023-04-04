@@ -7,7 +7,6 @@ def make_sim_data(nObs, nVar, nL, noise):
     X = noise * np.random.rand(nObs, nVar)
     for iL in range(nL):
         coeffs = np.random.rand(nVar).reshape(1, nVar)
-        coeffs = (coeffs - np.mean(coeffs)) / np.sqrt(np.var(coeffs))
         y1 = np.random.rand(nObs, 1)
         X = X + y1 @ coeffs
     return X
@@ -51,7 +50,6 @@ def sims_split(sims):
         return 0
     k_v = [0]
     scores = [1]
-    scores_unadjusted = [1]
     for k in range(1, len(sims) - 1):
         lhs = sims[:k]
         rhs = sims[(k + 1):]
@@ -63,18 +61,22 @@ def sims_split(sims):
         betw_v = betw_v + [m_rhs for n in rhs]
         bs = np.var(betw_v)
         score = bs / (ws_left + ws_right)
-        scores_unadjusted.append(score)
         score = score * (1 - k/len(sims))
         scores.append(score)
         k_v.append(k)
     if np.max(scores) > 1:
-        nComp = k_v[np.argmax(scores_unadjusted)]
+        nComp = k_v[np.argmax(scores)]
     else:
         nComp = k_v[np.argmax(scores)]
-    return nComp, np.max(scores)
+    if nComp > 0:
+        prop_k = (nComp - 1) / len(sims)
+        linear_sim = np.min(sims) + prop_k * (np.max(sims) - np.min(sims))
+        if sims[nComp - 1] < linear_sim:
+            nComp = 0
+    return nComp
 
-def get_n_components(X, nIts=10):
+def get_n_components(X, nIts=30):
     eigenvalues, eigenvectors = run_PCA(X)
     sims = sim_per_component(X, nIts=nIts)
-    nComp, max_score = sims_split(sims)
+    nComp = sims_split(sims)
     return {'nComponents': nComp, 'eigenvalues': eigenvalues, 'eigenvectors': eigenvectors}
