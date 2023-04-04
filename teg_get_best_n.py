@@ -25,10 +25,9 @@ def get_eigenvector_sims(X1, X2):
     sims = []
     for iL in range(Sims.shape[1]):
         most_sim_ind = np.argmax(Sims[:, iL])
-        sims.append(Sims[most_sim_ind, iL])
-        #Sims[most_sim_ind, iL] = 0
-    sims.sort()
-    sims = sims[::-1]
+        s = Sims[most_sim_ind, iL]
+        sims.append(s)
+        Sims[most_sim_ind, iL] = 0
     return sims
 
 def sim_per_component(X, nIts = 20):
@@ -42,7 +41,7 @@ def sim_per_component(X, nIts = 20):
         X2 = X[indices[(half + 1):],:]
         sims = get_eigenvector_sims(X1, X2)
         Sims[iIt,:] = sims
-    m = np.median(Sims, axis=0)
+    m = np.mean(Sims, axis=0)
     return m
 
 def sims_split(sims):
@@ -50,6 +49,7 @@ def sims_split(sims):
         return 0
     k_v = [0]
     scores = [1]
+    scores_adjusted = [1]
     for k in range(1, len(sims) - 1):
         lhs = sims[:k]
         rhs = sims[(k + 1):]
@@ -61,17 +61,13 @@ def sims_split(sims):
         betw_v = betw_v + [m_rhs for n in rhs]
         bs = np.var(betw_v)
         score = bs / (ws_left + ws_right)
-        score = score * (1 - k/len(sims))
         scores.append(score)
+        score_adjusted = score * (1 - (k - 1)/len(sims))
+        scores_adjusted.append(score_adjusted)
         k_v.append(k)
-    if np.max(scores) > 1:
-        nComp = k_v[np.argmax(scores)]
-    else:
-        nComp = k_v[np.argmax(scores)]
+    nComp = k_v[np.argmax(scores)]
     if nComp > 0:
-        prop_k = (nComp - 1) / len(sims)
-        linear_sim = np.min(sims) + prop_k * (np.max(sims) - np.min(sims))
-        if sims[nComp - 1] < linear_sim:
+        if scores_adjusted[nComp - 1] < 1:
             nComp = 0
     return nComp
 

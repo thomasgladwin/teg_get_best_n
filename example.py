@@ -8,11 +8,11 @@ importlib.reload(teg_get_best_n)
 # Tests
 nL_v = []
 per_nL = []
-for nL_loop in list(range(10)) + list(range(19, 20)):
-    nObs = 10000
-    nVar = 100
+for nL_loop in [0, 1, 2, 3, 4] + list(range(5, 11)) + list(range(12, 20, 4)):
+    nObs = 2000
+    nVar = 40
     nL_max = 15
-    noise = 1
+    noise = 0.1
     nSims = 100
     nL_true = []
     nL_est = []
@@ -44,8 +44,9 @@ for nL_loop in list(range(10)) + list(range(19, 20)):
     nL_correct_knee = nL_knee == nL_true
     nL_err_bias = nL_est - nL_true
     nL_err_knee_bias = nL_knee - nL_true
+    nL0 = nL_est == 0
     M = []
-    for z in zip(nL_true, nL_est, nL_correct, nL_err, nL_err_bias):
+    for z in zip(nL_true, nL_est, nL_correct, nL_err, nL_err_bias, nL0):
         #print(z)
         M.append(z)
     M = np.array(M)
