@@ -47,9 +47,9 @@ def sim_per_component(X, nIts = 20):
 def sims_split(sims):
     if len(sims) < 2:
         return 0
-    k_v = [0]
-    scores = [1]
-    scores_adjusted = [1]
+    k_v = []
+    scores = []
+    scores_adjusted = []
     for k in range(1, len(sims) - 1):
         lhs = sims[:k]
         rhs = sims[(k + 1):]
@@ -66,13 +66,14 @@ def sims_split(sims):
         scores_adjusted.append(score_adjusted)
         k_v.append(k)
     nComp = k_v[np.argmax(scores)]
+    zeroComp = False
     if nComp > 0:
         if scores_adjusted[nComp - 1] < 1:
-            nComp = 0
-    return nComp
+            zeroComp = True
+    return nComp, zeroComp
 
 def get_n_components(X, nIts=30):
     eigenvalues, eigenvectors = run_PCA(X)
     sims = sim_per_component(X, nIts=nIts)
-    nComp = sims_split(sims)
-    return {'nComponents': nComp, 'eigenvalues': eigenvalues, 'eigenvectors': eigenvectors}
+    nComp, zeroComp = sims_split(sims)
+    return {'nComponents': nComp, 'zeroComponents': zeroComp, 'eigenvalues': eigenvalues, 'eigenvectors': eigenvectors}
