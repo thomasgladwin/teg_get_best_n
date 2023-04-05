@@ -9,6 +9,8 @@ Usage:
 
 O = teg_get_best_n.get_n_components(X)
 
-This returns a dictionary with the estimated number of components in O['nComponents'], as well as the eigenvalues (O['eigenvalues']) and eigenvectors (O['eigenvectors']). The file example.py contains tests with simulated data to check how well the true number of latent variables, used to generate simulated data, is recovered.
+This returns a dictionary with the estimated number of components in O['nComponents'], as well as the eigenvalues (O['eigenvalues']) and eigenvectors (O['eigenvectors']). A True/False value is given in O['ZeroComponents'] to indicate whether the procedure suggests there are zero components instead of the found split (this primarily occurs when relatively many components are estimated).
+
+Simulation code for testing is provided in example.py.
 
 [![DOI](https://zenodo.org/badge/621991078.svg)](https://zenodo.org/badge/latestdoi/621991078)
