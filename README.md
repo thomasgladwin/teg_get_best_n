@@ -15,4 +15,6 @@ This returns a dictionary with the estimated number of components in O['nCompone
 
 Simulation code for testing is provided in example.py.
 
+Paper: https://methods-x.com/article/S2215-0161(23)00283-2/fulltext
+
 [![DOI](https://zenodo.org/badge/621991078.svg)](https://zenodo.org/badge/latestdoi/621991078)
